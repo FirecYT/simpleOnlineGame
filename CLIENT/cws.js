@@ -22,14 +22,14 @@ ws.onmessage = function(event) {
 	var data = JSON.parse(event.data);
 	switch(data.type){
 		case 0:
-			log("< "+data.data);
+			log(data.data);
 			break;
 		case 1:
 			p = data.data;
 			start();
 			break;
 		case 2:
-			updatePlayers(data.data);
+			updateObjects(data.data);
 			break;
 	}
 };

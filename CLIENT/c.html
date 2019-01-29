@@ -2,46 +2,13 @@
 *{	margin: 0;
 	padding: 0;
 	float: left;}
+#text {
+	border: 1px solid #004;
+	padding: 1px;}
 </style>
 
 <canvas id="cnv" width="100" height="100"></canvas>
 <div id="text"></div>
 
 <script type="text/javascript" src="cws.js"></script>
-<script type="text/javascript">
-// Какие то константы
-var bgColor = "#333",
-	plColor = "#FA0",
-	speed=1;
-//
-
-var cnv = document.getElementById('cnv'),
-	ctx = cnv.getContext('2d');
-
-var start = function() {
-	console.log("START!");
-	ctx.fillStyle=bgColor;
-	ctx.fillRect(0, 0, cnv.width, cnv.height);
-}
-var updatePlayers = function(p) {
-	ctx.fillStyle=bgColor;
-	ctx.fillRect(0, 0, cnv.width, cnv.height);
-	for(key in p){
-		ctx.fillStyle="#555";
-		ctx.fillRect(p[key].x-5, p[key].y-5, 15, 15);
-		ctx.fillStyle=plColor;
-		ctx.fillRect(p[key].x, p[key].y, 5, 5);
-	}
-}
-
-window.addEventListener('keydown', function(e){
-	var code = e.keyCode;
-	switch (code) {
-		case 37: move(p.x-=speed, p.y); break;
-		case 38: move(p.x, p.y-speed); break;
-		case 39: move(p.x+=speed, p.y); break;
-		case 40: move(p.x, p.y+=speed); break;
-		default: log(code); //Everything else
-	}
-}, false);
-</script>
+<script type="text/javascript" src="cg.js"></script>
