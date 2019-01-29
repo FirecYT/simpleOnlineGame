@@ -16,8 +16,8 @@ wss.on('connection', function(ws) {
 	var id = random(0, 1000);
 	clients[id] = ws;
 	data[id] = new player();
-	data[id].x = random(5, 95);
-	data[id].y = random(5, 95);
+	data[id].x = random(5, 90);
+	data[id].y = random(5, 90);
 
 	console.log("Новое соединение " + id);
 
