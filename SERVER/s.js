@@ -1,4 +1,7 @@
 var wsmodule = new require('ws');
+var fs = new require('fs');
+
+var logFileName = "log" + +(new Date()) + ".txt";
 
 var pIDs = 0;
 var bIDs = 0;
@@ -19,6 +22,21 @@ var block = function (x, y) {
 	this.y=y;
 }
 
+var gui = function () {
+	console.log("\033c");
+	console.log(fs.readFileSync(logFileName, "utf8"));
+	console.log("\
+│== Status ==================================\n\
+│ Players: "+Object.keys(objects.players).length+"\n\
+│ Lust connect: "+pIDs+"\n\
+│\n\
+│\n\
+│============================================");
+}
+
+fs.writeFileSync(logFileName, "");
+gui();
+
 var stdin = process.openStdin();
 var wss = new wsmodule.Server({port: 8081});
 // Функции для сервера
@@ -27,7 +45,8 @@ wss.on('connection', function(ws) {
 	clients[id] = ws;
 	objects.players[id] = new player(random(0, 20)*5, random(0, 20)*5);
 
-	console.log("Новое соединение " + id);
+	fs.appendFileSync(logFileName, id + " connect\r\n");
+	gui();
 
 	send(ws, 0, "Ваш id " + id);
 	send(ws, 1, objects.players[id]);
@@ -36,12 +55,13 @@ wss.on('connection', function(ws) {
 	// Функции
 	ws.on('message', function(message) {
 		var mData = JSON.parse(message);
-		console.log(id + ">" + message);
 		switch(mData.type){
 			case 0:
 				for (var key in clients) {
 					send(clients[key], 0, mData.data);
 				}
+
+				fs.appendFileSync(logFileName, id + " send \"" + message + "\"\r\n");
 				break;
 			case 1:
 				if(~mData.data.x) objects.players[id].x = mData.data.x;
@@ -49,18 +69,24 @@ wss.on('connection', function(ws) {
 				if(~mData.data.name) objects.players[id].name = mData.data.name;
 				if(~mData.data.hp) objects.players[id].hp = mData.data.hp;
 				updateObjects();
+
+				//fs.appendFileSync(logFileName, id + " send \"" + message + "\"\r\n");
 				break;
 			case 3:
 				objects.blocks[++bIDs]=new block(mData.data.x, mData.data.y);
 				updateObjects();
+
+				fs.appendFileSync(logFileName, id + " place new block\r\n");
 				break;
 		}
+		gui();
 	});
 	ws.on('close', function() {
 		delete objects.players[id];
 		delete clients[id];
 		updateObjects();
-		console.log(id + " exit");
+		fs.appendFileSync(logFileName, id + " disconnect\r\n");
+		gui();
 	});
 });
 

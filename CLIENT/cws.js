@@ -1,4 +1,4 @@
-﻿var ws = new WebSocket("ws://localhost:8081");
+﻿var ws = new WebSocket("ws://127.0.0.1:8081");
 
 var p = null;
 var text = document.getElementById('text');
