@@ -37,13 +37,3 @@ ws.onmessage = function(event) {
 ws.onerror = function(error) {
 	log("Ошибка " + error.message);
 };
-
-var send = function(type, data) {
-	ws.send(JSON.stringify({"type": type, "data": data}));
-}
-
-var move = function(x, y) {
-	p.x=x;
-	p.y=y;
-	send(1, p);
-}

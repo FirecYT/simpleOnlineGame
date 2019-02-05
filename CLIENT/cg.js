@@ -27,14 +27,27 @@ var updateObjects = function(obj) {
 	}
 }
 
+
+var up = 0,
+	down = 1,
+	left = 2,
+	right = 3;
 window.addEventListener('keydown', function(e){
 	var code = e.keyCode;
 	switch (code) {
-		case 37: move(p.x-=speed, p.y); break;
-		case 38: move(p.x, p.y-speed); break;
-		case 39: move(p.x+=speed, p.y); break;
-		case 40: move(p.x, p.y+=speed); break;
-		case 32: send(3, {x: p.x, y: p.y}); break;
+		case 37: move(left); break;
+		case 38: move(up); break;
+		case 39: move(right); break;
+		case 40: move(down); break;
+		case 32: send(3, "Good"); break;
 		default: log(code); //Everything else
 	}
 }, false);
+
+var send = function(type, data) {
+	ws.send(JSON.stringify({"type": type, "data": data}));
+}
+
+var move = function(direction) {
+	send(5, direction);
+}

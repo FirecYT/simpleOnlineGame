@@ -9,12 +9,14 @@ var bIDs = 0;
 var clients = {};
 var objects = {players: {}, blocks: {}};
 
+// Objects
 var player = function (x, y) {
 	this.type="player",
 	this.x=x;
 	this.y=y;
 	this.name="Name";
 	this.hp=100;
+	this.speed=5;
 }
 var block = function (x, y) {
 	this.type = "block"
@@ -22,6 +24,9 @@ var block = function (x, y) {
 	this.y=y;
 }
 
+// For something
+
+// Console interface
 var gui = function () {
 	console.log("\033c");
 	console.log(fs.readFileSync(logFileName, "utf8"));
@@ -37,9 +42,8 @@ var gui = function () {
 fs.writeFileSync(logFileName, "");
 gui();
 
-var stdin = process.openStdin();
-var wss = new wsmodule.Server({port: 8081});
 // Функции для сервера
+var wss = new wsmodule.Server({port: 8081});
 wss.on('connection', function(ws) {
 	var id = pIDs;
 	// Функции
@@ -58,12 +62,13 @@ wss.on('connection', function(ws) {
 				if(~mData.data.y) objects.players[id].y = mData.data.y;
 				if(~mData.data.name) objects.players[id].name = mData.data.name;
 				if(~mData.data.hp) objects.players[id].hp = mData.data.hp;
+				if(~mData.data.speed) objects.players[id].speed = mData.data.speed;
 				updateObjects();
 
 				//log(id + " send \"" + message + "\"\r\n");
 				break;
 			case 3:
-				objects.blocks[++bIDs]=new block(mData.data.x, mData.data.y);
+				objects.blocks[++bIDs]=new block(objects.players[id].x, objects.players[id].y);
 				updateObjects();
 
 				log(id + " place new block");
@@ -79,6 +84,25 @@ wss.on('connection', function(ws) {
 				send(ws, 1, objects.players[id]);
 				updateObjects();
 				break;
+			case 5:
+				switch(mData.data){
+					case 0: // Up
+						objects.players[id].y-=objects.players[id].speed;
+						break;
+					case 1: // Down
+						objects.players[id].y+=objects.players[id].speed;
+						break;
+					case 2: // Left
+						objects.players[id].x-=objects.players[id].speed;
+						break;
+					case 3: // Right
+						objects.players[id].x+=objects.players[id].speed;
+						break;
+				}
+				updateObjects();
+				break;
+			case 10000:
+				break;
 		}
 		gui();
 	});
@@ -92,6 +116,7 @@ wss.on('connection', function(ws) {
 });
 
 // Чтение из консоли
+var stdin = process.openStdin();
 stdin.on('data', function(chunk) {
 	var text = ""+chunk;
 	var pars = text.split(" ");
@@ -149,5 +174,6 @@ var updateObjects = function() {
 }
 
 var log = function(data) {
-	fs.appendFileSync(logFileName, "["+ +(new Date()) + "] - " + data + "\r\n");
+	var date = new Date();
+	fs.appendFileSync(logFileName, "[" + date.getDate() + "." + +(date.getMonth())+1 + "." + date.getFullYear() + "-" + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds() + "] - " + data + "\r\n");
 }
