@@ -1,0 +1,6 @@
+0C - Message
+1SC - Info about player
+2C - Position of all players
+3S - Add block
+4S - Connection
+5S - Move

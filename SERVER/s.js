@@ -41,17 +41,7 @@ var stdin = process.openStdin();
 var wss = new wsmodule.Server({port: 8081});
 // Функции для сервера
 wss.on('connection', function(ws) {
-	var id = ++pIDs;
-	clients[id] = ws;
-	objects.players[id] = new player(random(0, 20)*5, random(0, 20)*5);
-
-	fs.appendFileSync(logFileName, id + " connect\r\n");
-	gui();
-
-	send(ws, 0, "Ваш id " + id);
-	send(ws, 1, objects.players[id]);
-	updateObjects();
-	
+	var id = pIDs;
 	// Функции
 	ws.on('message', function(message) {
 		var mData = JSON.parse(message);
@@ -61,7 +51,7 @@ wss.on('connection', function(ws) {
 					send(clients[key], 0, mData.data);
 				}
 
-				fs.appendFileSync(logFileName, id + " send \"" + message + "\"\r\n");
+				log(id + " send \"" + mData.data);
 				break;
 			case 1:
 				if(~mData.data.x) objects.players[id].x = mData.data.x;
@@ -70,13 +60,24 @@ wss.on('connection', function(ws) {
 				if(~mData.data.hp) objects.players[id].hp = mData.data.hp;
 				updateObjects();
 
-				//fs.appendFileSync(logFileName, id + " send \"" + message + "\"\r\n");
+				//log(id + " send \"" + message + "\"\r\n");
 				break;
 			case 3:
 				objects.blocks[++bIDs]=new block(mData.data.x, mData.data.y);
 				updateObjects();
 
-				fs.appendFileSync(logFileName, id + " place new block\r\n");
+				log(id + " place new block");
+				break;
+			case 4:
+				id = ++pIDs;
+				clients[id] = ws;
+				objects.players[id] = new player(random(0, 20)*5, random(0, 20)*5);
+
+				log(id + " connect");
+
+				send(ws, 0, "Ваш id " + id);
+				send(ws, 1, objects.players[id]);
+				updateObjects();
 				break;
 		}
 		gui();
@@ -85,7 +86,7 @@ wss.on('connection', function(ws) {
 		delete objects.players[id];
 		delete clients[id];
 		updateObjects();
-		fs.appendFileSync(logFileName, id + " disconnect\r\n");
+		log(id + " disconnect");
 		gui();
 	});
 });
@@ -96,7 +97,7 @@ stdin.on('data', function(chunk) {
 	var pars = text.split(" ");
 	pars[pars.length-1]=pars[pars.length-1].replace("\r\n", "");
 	switch(pars[0]){
-		case "p":
+		case "players":
 			if (pars[1]) {
 				if (pars[2]) {
 					console.log(objects.players[pars[1]][pars[2]]);
@@ -107,7 +108,7 @@ stdin.on('data', function(chunk) {
 				console.log(Object.keys(objects.players));
 			}
 			break;
-		case "b":
+		case "blocks":
 			if (pars[1]) {
 				if (pars[2]) {
 					console.log(objects.blocks[pars[1]][pars[2]]);
@@ -118,8 +119,16 @@ stdin.on('data', function(chunk) {
 				console.log(Object.keys(objects.blocks));
 			}
 			break;
-		case "o":
+		case "objects":
 			console.log(Object.keys(objects));
+			break;
+		case "stop":
+			log("Server stop");
+			process.exit(0);
+			break;
+		case "clear":
+			objects.blocks={};
+			updateObjects();
 			break;
 	}
 });
@@ -128,6 +137,7 @@ stdin.on('data', function(chunk) {
 var random = function(min, max) {
 	return Math.floor(Math.random() * (max - min)) + min;
 }
+
 var send = function(ws, type, data) {
 	ws.send(JSON.stringify({"type": type, "data": data}));
 }
@@ -136,4 +146,8 @@ var updateObjects = function() {
 	for (var key in clients) {
 		send(clients[key], 2, objects);
 	}
+}
+
+var log = function(data) {
+	fs.appendFileSync(logFileName, "["+ +(new Date()) + "] - " + data + "\r\n");
 }

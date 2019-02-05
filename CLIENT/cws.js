@@ -9,6 +9,7 @@ var log = function(data) {
 
 ws.onopen = function() {
 	log("Соединение установлено.");
+	send(4, "Good!");
 };
 ws.onclose = function(event) {
 	if (event.wasClean) {
