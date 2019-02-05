@@ -28,7 +28,7 @@ var block = function (x, y) {
 
 // Console interface
 var gui = function () {
-	console.log("\033c");
+	console.log("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
 	console.log(fs.readFileSync(logFileName, "utf8"));
 	console.log("\
 │== Status ==================================\n\
@@ -175,5 +175,9 @@ var updateObjects = function() {
 
 var log = function(data) {
 	var date = new Date();
-	fs.appendFileSync(logFileName, "[" + date.getDate() + "." + +(date.getMonth())+1 + "." + date.getFullYear() + "-" + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds() + "] - " + data + "\r\n");
+	var day = date.getDate(),
+		month = date.getMonth()+1,
+		year = date.getFullYear();
+
+	fs.appendFileSync(logFileName, "["+day+"."+month+"."+year+ "-"+date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds() + "] - " + data + "\r\n");
 }
